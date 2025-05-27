@@ -19,7 +19,7 @@ defineOptions({
                     <Mic class="text-foreground" :size="14" />
                 </span>
             </div>
-            <div class="w-24">取消</div>
+            <div class="w-10">取消</div>
         </div>
     </div>
 </template>

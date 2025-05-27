@@ -1,17 +1,17 @@
 <script setup lang='ts'>
 import { Input } from '@/components/ui/input'
-import { Columns3Cog, Mic, Moon, Search, Sun } from 'lucide-vue-next';
+import { Mic, Moon, Search, Sun } from 'lucide-vue-next';
 import { useColorMode } from '@vueuse/core'
 import OpenWeatherMap from 'openweathermap-ts';
 import { ref } from 'vue';
 import type { CurrentResponse } from 'openweathermap-ts/dist/types';
+import { useTheme } from '@/hooks/useTheme';
 
 defineOptions({
     name: 'HomeView'
 })
 
 const mode = useColorMode()
-mode.value = 'dark'
 
 
 const openWeather = new OpenWeatherMap({
@@ -46,15 +46,21 @@ const getAllCityWeather = async () => {
 }
 getAllCityWeather()
 
+
+const { isDark, toggleTheme } = useTheme()
+const toggleDarkMode = () => {
+    toggleTheme()
+    // mode.value = mode.value === 'dark' ? 'light' : 'dark';
+}
 </script>
 <template>
     <div class="main bg-background p-4 h-full">
         <div class="relative mb-1">
             <h3 class="text-foreground text-2xl">天气</h3>
             <Moon color="#000" :size="16" class="absolute right-0 top-0" v-if="mode === 'light'"
-                @click="mode = 'dark'" />
+                @click="toggleDarkMode" />
             <Sun color="#fff" :size="16" class="absolute right-0 top-0" v-if="mode === 'dark'"
-                @click="mode = 'light'" />
+                @click="toggleDarkMode" />
         </div>
         <div class="relative w-full max-w-sm items-center bg-foreground/70 rounded-lg text-foreground">
             <Input id="search" type="text" placeholder="搜索城市或机场" class="pl-6 text-foreground" />
