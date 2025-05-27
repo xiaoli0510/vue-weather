@@ -47,7 +47,7 @@ const getAllCityWeather = async () => {
 getAllCityWeather()
 
 
-const { isDark, toggleTheme } = useTheme()
+const { toggleTheme } = useTheme()
 const toggleDarkMode = () => {
     toggleTheme()
     // mode.value = mode.value === 'dark' ? 'light' : 'dark';
@@ -62,7 +62,8 @@ const toggleDarkMode = () => {
             <Sun color="#fff" :size="16" class="absolute right-0 top-0" v-if="mode === 'dark'"
                 @click="toggleDarkMode" />
         </div>
-        <div class="relative w-full max-w-sm items-center bg-foreground/70 rounded-lg text-foreground">
+        <div class="relative w-full max-w-sm items-center bg-foreground/70 rounded-lg text-foreground"
+            @click="$router.push('/search')">
             <Input id="search" type="text" placeholder="搜索城市或机场" class="pl-6 text-foreground" />
             <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
                 <Search class="text-foreground" :size="14" />
