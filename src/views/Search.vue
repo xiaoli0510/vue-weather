@@ -3,6 +3,7 @@ import Input from '@/components/ui/input/Input.vue';
 import { Search, Mic, CircleX } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 import { city, type ICityItem } from '@/apis/city.ts'
+import Card from '@/components/Card.vue';
 
 defineOptions({
     name: 'SearchView'
@@ -41,7 +42,7 @@ const clear = () => {
 }
 </script>
 <template>
-    <div class="main bg-background h-full">
+    <div class="main bg-background h-full relative ">
         <div class="flex p-4">
             <div class="flex-1 relative items-center bg-foreground/40 rounded-lg text-foreground">
                 <Input id="search" type="text" placeholder="搜索城市或机场" class="pl-6 text-foreground" v-model="cityName" />
@@ -55,7 +56,7 @@ const clear = () => {
             </div>
             <div class="w-10 text-foreground text-center leading-7" @click="$router.push('/')">取消</div>
         </div>
-        <div v-if="!cityName">
+        <div v-if="!cityName" class="px-4">
             <div class="mt-2 text-muted-foreground text-xs">建议</div>
             <div class="history flex flex-col gap-2 text-foreground text-sm mt-1">
                 <div v-for="(item, index) in history" :key="index">
@@ -66,6 +67,9 @@ const clear = () => {
         </div>
         <div v-else style="height:calc(100% - 70px)" class="overflow-y-auto border-1 px-4">
             <div class="mt-1 text-foreground" v-for="(value, key) in curCityObj" :key="key">{{ value }}</div>
+        </div>
+        <div class="absolute bottom-0 left-0 w-full bg-gray-400 rounded-t-lg" style="height:calc(100%  - 10px)">
+            <Card />
         </div>
     </div>
 </template>

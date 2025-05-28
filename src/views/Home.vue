@@ -95,9 +95,3 @@ const toggleDarkMode = () => {
     </div>
 
 </template>
-<style scoped>
-.vertical-text {
-    writing-mode: vertical-rl;
-    text-orientation: upright;
-}
-</style>
