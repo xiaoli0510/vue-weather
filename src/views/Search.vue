@@ -68,8 +68,6 @@ const clear = () => {
         <div v-else style="height:calc(100% - 70px)" class="overflow-y-auto border-1 px-4">
             <div class="mt-1 text-foreground" v-for="(value, key) in curCityObj" :key="key">{{ value }}</div>
         </div>
-        <div class="absolute bottom-0 left-0 w-full bg-gray-400 rounded-t-lg" style="height:calc(100%  - 10px)">
-            <Card />
-        </div>
+        <Card />
     </div>
 </template>
