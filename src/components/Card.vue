@@ -1,31 +1,59 @@
 <script setup lang='ts'>
 import { Progress } from '@/components/ui/progress'
 import { CalendarDays, ChartLine, CircleGauge, Cloud, CloudHail, Droplet, Eclipse, Eye, SquareArrowUpRight, Sun, Sunset, Table, ThermometerSun, TriangleAlert, Waves, Wind } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
+import { apiGetWeatherByCity } from '@/apis/weather';
+import { useFollowStore } from '@/store/follow';
+import type { CurrentResponse } from 'openweathermap-ts/dist/types';
+
 defineOptions({
     name: 'CardCom'
 })
+const emits = defineEmits([
+    'close'
+])
 const progress = ref(13)
-defineProps({
-    show: {
-        type: Boolean,
-        default: true
-    }
+
+interface Props {
+    show: boolean,
+    city?: string
+}
+const props = withDefaults(defineProps<Props>(), {
+    show: true,
+    city: () => 'Shenzhen'
 })
+console.log(props.city)
+
 
 const close = () => {
+    emits('close')
+}
 
+const data = ref<CurrentResponse | void>()
+const getWeather = async () => {
+    console.log(props.city)
+    const res = await apiGetWeatherByCity('Shenzhen')
+    data.value = res
+}
+
+onMounted(() => {
+    getWeather()
+})
+
+const { add } = useFollowStore()
+const addCity = () => {
+    add(props.city)
 }
 </script>
 <template>
     <div v-if="show" class="absolute bottom-0 left-0 w-full bg-gray-400 rounded-t-lg" style="height:calc(100%  - 10px)">
-        <div class="rounded-t-lg p-4 text-foreground h-full">
+        <div class="rounded-t-lg p-4 text-foreground h-full" v-if="data">
             <div class="flex text-xs justify-between">
                 <div @click="close">取消</div>
-                <div>添加</div>
+                <div @click="addCity">添加</div>
             </div>
             <div class="my-6 text-center">
-                <div class="text-lg">海口市</div>
+                <div class="text-lg">{{ data.name }}</div>
                 <div class="text-6xl my-2">30°</div>
                 <div>
                     <span class="text-xs vertical-text">最高</span>

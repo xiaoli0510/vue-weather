@@ -2,39 +2,26 @@
 import { Input } from '@/components/ui/input'
 import { Mic, Moon, Search, Sun } from 'lucide-vue-next';
 import { useColorMode } from '@vueuse/core'
-import OpenWeatherMap from 'openweathermap-ts';
 import { ref } from 'vue';
 import type { CurrentResponse } from 'openweathermap-ts/dist/types';
 import { useTheme } from '@/hooks/useTheme';
+import { apiGetWeatherByCity } from '@/apis/weather';
+import { useFollowStore } from '@/store/follow';
 
 defineOptions({
     name: 'HomeView'
 })
 
 const mode = useColorMode()
-
-
-const openWeather = new OpenWeatherMap({
-    apiKey: '03529234da0b399e8332896853683dc1'
-});
-
 const list = ref<CurrentResponse[]>([])
 
 const curCity = 'Shenzhen'
 
-const cityList = [
-    'Shenzhen',
-    'Wuhan',
-    'Dunhuang'
-]
+const { cityList } = useFollowStore()
 
 const getAllCityWeather = async () => {
     const promises = cityList.map((city) => {
-        return openWeather.getCurrentWeatherByCityName({
-            cityName: city
-        }).catch(error => {
-            console.log(error);
-        })
+        return apiGetWeatherByCity(city)
     })
     const results = await Promise.all(promises)
     //按照cityList的顺序进行升序排序
@@ -46,11 +33,9 @@ const getAllCityWeather = async () => {
 }
 getAllCityWeather()
 
-
 const { toggleTheme } = useTheme()
 const toggleDarkMode = () => {
     toggleTheme()
-    // mode.value = mode.value === 'dark' ? 'light' : 'dark';
 }
 </script>
 <template>
@@ -72,7 +57,7 @@ const toggleDarkMode = () => {
                 <Mic class="text-foreground" :size="14" />
             </span>
         </div>
-        <div class="flex flex-col gap-2 mt-4">
+        <div class="flex flex-col gap-2 mt-4" v-if="list.length > 0">
             <div class="rounded-lg p-2 bg-gray-300 text-foreground shadow-md" v-for="item in list" :key="item.id">
                 <div class="flex flex-row justify-between items-center">
                     <div>
