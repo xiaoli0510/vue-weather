@@ -8,6 +8,8 @@ import type { CurrentResponse } from 'openweathermap-ts/dist/types';
 import { fahrenheitToCelsius } from '@/utils/helper';
 import type { IHourItem } from './types';
 import { RAINODDS } from '@/constants/api';
+import { DAYMAP } from '@/constants/date';
+import { isTodayLocal } from '@/utils/date';
 
 defineOptions({
     name: 'CardCom'
@@ -133,7 +135,7 @@ const addCity = () => {
                 <div v-if="airData" class="mt-2 w-full rounded-lg p-2 text-sm  bg-foreground/20">
                     <div>{{ airData.list[0].main.aqi }}-{{ airData.list[0].main.aqi >= 8 ? '优' :
                         airData.list[0].main.aqi
-        >= 6 ? '良' : '中' }}</div>
+                        >= 6 ? '良' : '中' }}</div>
                     <div class="my-2">
                         <Progress v-model="progress" class="w-full" />
                     </div>
@@ -144,7 +146,7 @@ const addCity = () => {
                 <div class="mt-2 w-full rounded-lg p-2 text-sm  bg-foreground/20">
                     <div class="text-xs border-b-1 border-foreground/20 leading-9">
                         {{ new Date(nextRainInfo!.time).getHours() }}时时左右预计有雨。阵风风速最高{{
-                            nextRainInfo?.data.instant.details.wind_speed }}米/秒。
+                        nextRainInfo?.data.instant.details.wind_speed }}米/秒。
                     </div>
                     <div class="flex overflow-x-auto" v-if="hour24Data">
                         <div class="text-xs p-1 mr-6 text-center  whitespace-nowrap" v-for="(item, index) in hour24Data"
@@ -173,49 +175,49 @@ const addCity = () => {
                     <div class="flex flex-col">
                         <div class="flex flex-row  justify-between text-xs p-3 border-t-1 border-foreground/20"
                             v-for="(value, key) in day10Data" :key="key">
-                            <div class="w-1/5 items-center flex">今天</div>
+                            <div class="w-1/5 items-center flex">{{ isTodayLocal(value.time) ? '今天' : '周' +
+                                DAYMAP.get(new
+                                    Date(value.time).getDay()) }}</div>
                             <div class="w-1/5">
-                                <div>
-                                    <CloudHail :size="16" />
-                                </div>
-                                <div class="text-xs"
-                                    v-if="value.data.next_1_hours && value.data.next_1_hours.summary && RAINODDS.get(value.data.next_1_hours.summary.symbol_code)">
-                                    {{ RAINODDS.get(value.data.next_1_hours.summary.symbol_code) }}%
-                                </div>
+                                <template v-if="value.data.next_1_hours && value.data.next_1_hours.summary.symbol_code">
+                                    <Cloud v-if="value.data.next_1_hours.summary.symbol_code.search('cloudy') !== -1" />
+                                    <CloudHail
+                                        v-else-if="value.data.next_1_hours.summary.symbol_code.search('rain') !== -1" />
+                                    <Sun color="yellow" v-else />
+                                    <div class="text-xs"
+                                        v-if="RAINODDS.has(value.data.next_1_hours.summary.symbol_code)">
+                                        {{ RAINODDS.get(value.data.next_1_hours.summary.symbol_code) }}%
+                                    </div>
+                                </template>
+                                <template
+                                    v-else-if="value.data.next_6_hours && value.data.next_6_hours.summary.symbol_code">
+                                    <Cloud v-if="value.data.next_6_hours.summary.symbol_code.search('cloudy') !== -1" />
+                                    <CloudHail
+                                        v-else-if="value.data.next_6_hours.summary.symbol_code.search('rain') !== -1" />
+                                    <Sun color="yellow" v-else />
+                                    <div class="text-xs"
+                                        v-if="RAINODDS.has(value.data.next_6_hours.summary.symbol_code)">
+                                        {{ RAINODDS.get(value.data.next_6_hours.summary.symbol_code) }}%
+                                    </div>
+                                </template>
+                                <template
+                                    v-else-if="value.data.next_12_hours && value.data.next_12_hours.summary.symbol_code">
+                                    <Cloud
+                                        v-if="value.data.next_12_hours.summary.symbol_code.search('cloudy') !== -1" />
+                                    <CloudHail
+                                        v-else-if="value.data.next_12_hours.summary.symbol_code.search('rain') !== -1" />
+                                    <Sun color="yellow" v-else />
+                                    <div class="text-xs"
+                                        v-if="RAINODDS.has(value.data.next_12_hours.summary.symbol_code)">
+                                        {{ RAINODDS.get(value.data.next_12_hours.summary.symbol_code) }}%
+                                    </div>
+                                </template>
                             </div>
                             <div class="flex-1 flex-row flex items-center justify-center">
                                 <span class="text-foreground/70">{{ value.data.instant.details.air_temperature
                                     }}°</span>
                                 <Progress v-model="progress" class="w-3/5  mx-2" />
                                 <span>{{ value.data.instant.details.air_temperature }}°</span>
-                            </div>
-                        </div>
-                        <div class="flex flex-row  justify-between text-xs p-3 border-t-1 border-foreground/20"
-                            v-for="i in 1" :key="i">
-                            <div class="w-1/5 items-center flex">今天</div>
-                            <div class="w-1/5">
-                                <div>
-                                    <Cloud :size="16" />
-                                </div>
-                            </div>
-                            <div class="flex-1 flex-row flex items-center justify-center">
-                                <span class="text-foreground/70">30°</span>
-                                <Progress v-model="progress" class="w-3/5  mx-2" />
-                                <span>30°</span>
-                            </div>
-                        </div>
-                        <div class="flex flex-row  justify-between text-xs p-3 border-t-1 border-foreground/20"
-                            v-for="i in 1" :key="i">
-                            <div class="w-1/5 items-center flex">今天</div>
-                            <div class="w-1/5">
-                                <div>
-                                    <Sun color="yellow" :size="16" />
-                                </div>
-                            </div>
-                            <div class="flex-1 flex-row flex items-center justify-center">
-                                <span class="text-foreground/70">30°</span>
-                                <Progress v-model="progress" class="w-3/5  mx-2" />
-                                <span>30°</span>
                             </div>
                         </div>
                     </div>
