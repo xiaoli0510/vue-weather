@@ -1,11 +1,13 @@
 <script setup lang='ts'>
 import { Progress } from '@/components/ui/progress'
-import { CalendarDays, ChartLine, CircleGauge, Cloud, CloudHail, Droplet, Eclipse, Eye, SquareArrowUpRight, Sun, Sunset, Table, ThermometerSun, TriangleAlert, Waves, Wind } from 'lucide-vue-next';
+import { CalendarDays, ChartLine, CircleGauge, Cloud, CloudHail, CloudLightning, Droplet, Eclipse, Eye, SquareArrowUpRight, Sun, Sunset, Table, ThermometerSun, TriangleAlert, Waves, Wind } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
 import { apiGetAirPollution, apiGetHourForecast, apiGetWeatherByCity } from '@/apis/weather';
 import { useFollowStore } from '@/store/follow';
 import type { CurrentResponse } from 'openweathermap-ts/dist/types';
 import { fahrenheitToCelsius } from '@/utils/helper';
+import type { IHourItem } from './types';
+import { RAINODDS } from '@/constants/api';
 
 defineOptions({
     name: 'CardCom'
@@ -56,14 +58,40 @@ const getAirPollution = async () => {
 // #endregion 获取空气质量data
 
 
-// #region 获取hourData
-const hourData = ref()
-const getHourData = async () => {
+// #region 获取24h hourData和 10day dayData
+const nextRainInfo = ref<IHourItem | null>(null)
+const hour24Data = ref<IHourItem[]>([])
+const day10Data = ref<{ [key: string]: IHourItem }>({})
+const get24HourTenDayData = async () => {
     apiGetHourForecast({
         lat: '31.2222',
         lon: '121.4581',
     }).then(res => {
-        hourData.value = res.data
+        const hour = new Date().getHours()
+        const tempDate = new Date().setHours(hour, 0, 0, 0)
+        const hourArr: Array<IHourItem> = []
+        const timeseries = res.data.properties.timeseries
+        timeseries.forEach((item: IHourItem) => {
+            if (new Date(item.time).getTime() >= tempDate) {
+                if (hourArr.length === 24) return
+                if (item.data.next_1_hours.summary.symbol_code.search('rain') !== -1 && !nextRainInfo.value) {
+                    nextRainInfo.value = item
+                }
+                hourArr.push(item)
+            }
+        })
+        hour24Data.value = hourArr
+
+        const dayObj: { [key: string]: IHourItem } = {}
+        timeseries.forEach((item: IHourItem) => {
+            const key = item.time.split('T')[0]
+            if (dayObj[key]) {
+                return;
+            }
+            dayObj[key] = item;
+        })
+        console.log('dayObj', dayObj)
+        day10Data.value = dayObj
     }).catch(err => {
         console.log(err);
     })
@@ -74,7 +102,7 @@ const getHourData = async () => {
 onMounted(() => {
     getWeather()
     getAirPollution()
-    getHourData()
+    get24HourTenDayData()
 })
 
 const { add } = useFollowStore()
@@ -105,7 +133,7 @@ const addCity = () => {
                 <div v-if="airData" class="mt-2 w-full rounded-lg p-2 text-sm  bg-foreground/20">
                     <div>{{ airData.list[0].main.aqi }}-{{ airData.list[0].main.aqi >= 8 ? '优' :
                         airData.list[0].main.aqi
-                            >= 6 ? '良' : '中' }}</div>
+        >= 6 ? '良' : '中' }}</div>
                     <div class="my-2">
                         <Progress v-model="progress" class="w-full" />
                     </div>
@@ -114,25 +142,24 @@ const addCity = () => {
                 <!-- #endregion 空气质量指数 -->
                 <!-- #region 小时预报 -->
                 <div class="mt-2 w-full rounded-lg p-2 text-sm  bg-foreground/20">
-                    <div class="text-xs border-b-1 border-foreground/20 leading-9">17:00左右预计有雨。阵风风速最高5米/秒。</div>
-                    <div class="flex overflow-x-auto">
-                        <div class="text-xs p-1 mr-6 text-center  whitespace-nowrap"
-                            v-for="(item, index) in hourData.properties.timeseries" :key="index">
-                            <template
-                                v-if="new Date(item.time).getTime() >= new Date('2025-08-01 18:00').getTime() && index <= 23">
-                                <div>{{ new Date(item.time).getHours() }}时</div>
-                                <div>
-                                    <template v-if="item.data.next_1_hours && item.data.next_1_hours.summary">
-                                        <Cloud
-                                            v-if="item.data.next_1_hours.summary.symbol_code.search('cloudy') !== -1" />
-                                        <Sun color="yellow"
-                                            v-if="item.data.next_1_hours.summary.symbol_code.search('sun') !== -1" />
-                                        <CloudHail
-                                            v-if="item.data.next_1_hours.summary.symbol_code.search('rain') !== -1" />
-                                    </template>
-                                </div>
-                                <div>{{ item.data.instant.details.air_temperature }}°</div>
-                            </template>
+                    <div class="text-xs border-b-1 border-foreground/20 leading-9">
+                        {{ new Date(nextRainInfo!.time).getHours() }}时时左右预计有雨。阵风风速最高{{
+                            nextRainInfo?.data.instant.details.wind_speed }}米/秒。
+                    </div>
+                    <div class="flex overflow-x-auto" v-if="hour24Data">
+                        <div class="text-xs p-1 mr-6 text-center  whitespace-nowrap" v-for="(item, index) in hour24Data"
+                            :key="index">
+                            <div>{{ new Date(item.time).getHours() === new Date().getHours() ? '现在' : new
+                                Date(item.time).getHours() + '时' }}</div>
+                            <div>
+                                <template v-if="item.data.next_1_hours && item.data.next_1_hours.summary">
+                                    <Cloud v-if="item.data.next_1_hours.summary.symbol_code.search('cloudy') !== -1" />
+                                    <CloudHail
+                                        v-else-if="item.data.next_1_hours.summary.symbol_code.search('rain') !== -1" />
+                                    <Sun color="yellow" v-else />
+                                </template>
+                            </div>
+                            <div>{{ item.data.instant.details.air_temperature }}°</div>
                         </div>
                     </div>
                 </div>
@@ -145,18 +172,22 @@ const addCity = () => {
                     </div>
                     <div class="flex flex-col">
                         <div class="flex flex-row  justify-between text-xs p-3 border-t-1 border-foreground/20"
-                            v-for="i in 1" :key="i">
+                            v-for="(value, key) in day10Data" :key="key">
                             <div class="w-1/5 items-center flex">今天</div>
                             <div class="w-1/5">
                                 <div>
                                     <CloudHail :size="16" />
                                 </div>
-                                <div class="text-xs">80%</div>
+                                <div class="text-xs"
+                                    v-if="value.data.next_1_hours && value.data.next_1_hours.summary && RAINODDS.get(value.data.next_1_hours.summary.symbol_code)">
+                                    {{ RAINODDS.get(value.data.next_1_hours.summary.symbol_code) }}%
+                                </div>
                             </div>
                             <div class="flex-1 flex-row flex items-center justify-center">
-                                <span class="text-foreground/70">30°</span>
+                                <span class="text-foreground/70">{{ value.data.instant.details.air_temperature
+                                    }}°</span>
                                 <Progress v-model="progress" class="w-3/5  mx-2" />
-                                <span>30°</span>
+                                <span>{{ value.data.instant.details.air_temperature }}°</span>
                             </div>
                         </div>
                         <div class="flex flex-row  justify-between text-xs p-3 border-t-1 border-foreground/20"
