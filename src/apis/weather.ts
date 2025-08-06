@@ -1,4 +1,5 @@
 import { getToken } from '@/utils/createToken'
+import service from '@/utils/service.'
 import axios from 'axios'
 import OpenWeatherMap from 'openweathermap-ts'
 
@@ -26,6 +27,7 @@ export const apiGetAirPollution = (params: { lat: string; lon: string }) => {
     ),
   })
 }
+
 // 根据城市经纬度获取24h的天气预报
 export const apiGetHourForecast = (params: { lat: string; lon: string }) => {
   return axios.get('https://api.met.no/weatherapi/locationforecast/2.0/compact', {
@@ -35,37 +37,22 @@ export const apiGetHourForecast = (params: { lat: string; lon: string }) => {
 
 // 根据location获取天气警报
 export const apiGetWarn = async () => {
-  const token = await getToken()
-  return axios.get(
-    'https://nk6tup5h7u.re.qweatherapi.com/v7/warning/now?location=101280601&lang=zh',
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  )
+  return service.get('v7/warning/now?location=101280601&lang=zh')
 }
 // 获取最近10天的历史数据
 export const apiHistory = async () => {
-  const token = await getToken()
-  return axios.get(
-    'https://nk6tup5h7u.re.qweatherapi.com/v7/historical/weather?location=101280601&date=20200725',
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  )
+  return service.get('v7/historical/weather?location=101280601&date=20200725')
 }
 // 获取紫外线指数
 export const apiGetIndex = async () => {
-  const token = await getToken()
-  return axios.get(
-    'https://nk6tup5h7u.re.qweatherapi.com/v7/indices/1d?location=101280601&type=5',
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  )
+  return service.get('v7/indices/1d?location=101280601&type=5')
+}
+
+// 根据城市经纬度获取24h天气
+export const apiGet24hData = async () => {
+  return service.get('v7/weather/24h?location=101280601&lang=zh')
+}
+// 根据城市获取月相
+export const apiGetMoon = async () => {
+  return service.get('v7/astronomy/moon?location=101280601&date=20250806')
 }
