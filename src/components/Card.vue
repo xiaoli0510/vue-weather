@@ -19,6 +19,7 @@ import Press from './Press.vue';
 import Moon from './Moon.vue';
 import FeelLike from './FeelLike.vue';
 import Rays from './Rays.vue';
+import WindCom from './WindCom.vue';
 
 defineOptions({
     name: 'CardCom'
@@ -89,13 +90,15 @@ const get24Hour10DayData = async () => {
 
 onMounted(() => {
     getCurWeather()
-    get24Hour10DayData()
+    // get24Hour10DayData()
 })
 
 const { add } = useFollowStore()
 const addCity = () => {
     add(props.city)
 }
+
+const isShow = ref(false)
 </script>
 <template>
     <div v-if="show" class="absolute bottom-0 left-0 w-full bg-gray-400 rounded-t-lg" style="height:calc(100%  - 10px)">
@@ -117,15 +120,15 @@ const addCity = () => {
             </div>
             <div class="flex flex-col overflow-y-auto rounded-t-lg" style="height:calc(100% - 210px)">
                 <!-- #region 空气质量指数 -->
-                <Air />
+                <Air v-if="isShow" />
                 <!-- #region 小时预报 -->
-                <HourForecast :nextRainWind="nextRainWind" :hour24Data="hour24Data" />
+                <HourForecast :nextRainWind="nextRainWind" :hour24Data="hour24Data" v-if="isShow" />
                 <!-- #endregion 小时预报 -->
                 <!-- #region 10日天气预报 -->
-                <DayForecast :day10Data="day10Data" />
+                <DayForecast :day10Data="day10Data" v-if="isShow" />
                 <!-- #endregion 10日天气预报 -->
                 <!-- #region 空气质量地图 -->
-                <div class="mt-2 w-full rounded-lg p-2 text-sm  bg-foreground/20">
+                <div class="mt-2 w-full rounded-lg p-2 text-sm  bg-foreground/20" v-if="isShow">
                     <div class="text-xs text-foreground/50 flex flex-row mb-2">
                         <Table color="#ccc" :size="16" />
                         <span>空气质量地图</span>
@@ -134,35 +137,35 @@ const addCity = () => {
                 </div>
                 <!-- #endregion 空气质量地图 -->
                 <!-- #region 天气警报 -->
-                <Warn />
+                <Warn v-if="isShow" />
                 <!-- #endregion 天气警报 -->
                 <!-- #region 体感温度+紫外线指数 -->
-                <div class="mt-2 flex flex-row justify-between gap-2">
+                <div class="mt-2 flex flex-row justify-between gap-2" v-if="isShow">
                     <FeelLike :curData="curData" />
                     <Rays />
                 </div>
                 <!-- #endregion 体感温度+紫外线指数 -->
                 <!-- #region 风 -->
-                <Wind :curData="curData" />
+                <WindCom :curData="curData" />
                 <!-- #endregion 风 -->
 
                 <!-- #region 日落+降水 -->
-                <div class="mt-2 flex flex-row justify-between gap-2">
+                <div class="mt-2 flex flex-row justify-between gap-2" v-if="isShow">
                     <SunRiseSet :curData="curData" />
                     <Precip :hour24Data="hour24Data" :nextRainWind="nextRainWind" />
                 </div>
                 <!-- #endregion 日落+降水 -->
                 <!-- #region 能见度+湿度 -->
-                <div class="mt-2 flex flex-row justify-between gap-2">
+                <div class="mt-2 flex flex-row justify-between gap-2" v-if="isShow">
                     <Visibility :curData="curData" />
                     <Dew :curData="curData" />
                 </div>
                 <!-- #endregion 能见度+湿度 -->
                 <!-- #region 月 -->
-                <Moon />
+                <Moon v-if="isShow" />
                 <!-- #endregion 月 -->
                 <!-- #region 平均+气压 -->
-                <div class="mt-2 flex flex-row justify-between gap-2">
+                <div class="mt-2 flex flex-row justify-between gap-2" v-if="isShow">
                     <Average :curData="curData" />
                     <Press />
                 </div>

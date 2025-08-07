@@ -1,5 +1,6 @@
 <script setup lang='ts'>
 import { CircleGauge } from 'lucide-vue-next';
+import { onMounted } from 'vue';
 
 defineOptions({
     name: 'PressCom'
@@ -14,7 +15,6 @@ defineOptions({
             </div>
         </div>
         <div>
-            气压图
         </div>
     </div>
 </template>
