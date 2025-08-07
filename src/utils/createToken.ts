@@ -24,7 +24,6 @@ export const getToken = () => {
           .setProtectedHeader(customHeader)
           .sign(privateKey)
           .then((token) => {
-            console.log('JWT: ' + token)
             return resolve(token)
           })
       })

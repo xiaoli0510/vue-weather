@@ -1,13 +1,26 @@
 <script setup lang='ts'>
 import { Sun } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import Progress from './ui/progress/Progress.vue';
+import { apiGetIndex } from '@/apis/weather';
 
 defineOptions({
     name: 'RaysCom'
 })
 
-defineProps(['indexData'])
+const indexData = ref<{ fxLink: string, daily: Array<{ level: string; category: string }> }>({
+    fxLink: '',
+    daily: [{ level: '', category: '' }]
+})
+const getIndexData = () => {
+    apiGetIndex().then(res => {
+        indexData.value = res.data
+    })
+}
+
+onMounted(() => {
+    getIndexData()
+})
 
 const progress = ref(3)
 </script>

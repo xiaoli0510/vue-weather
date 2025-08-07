@@ -2,6 +2,7 @@ import { getToken } from '@/utils/createToken'
 import service from '@/utils/service.'
 import axios from 'axios'
 import OpenWeatherMap from 'openweathermap-ts'
+import type { IResMoon, IResMoonPhase } from './model/moon'
 
 const openWeather = new OpenWeatherMap({
   apiKey: '03529234da0b399e8332896853683dc1',
@@ -41,7 +42,7 @@ export const apiGetWarn = async () => {
 }
 // 获取最近10天的历史数据
 export const apiHistory = async () => {
-  return service.get('v7/historical/weather?location=101280601&date=20200725')
+  return service.get('v7/historical/weather?location=101280601&date=20250807')
 }
 // 获取紫外线指数
 export const apiGetIndex = async () => {
@@ -54,5 +55,5 @@ export const apiGet24hData = async () => {
 }
 // 根据城市获取月相
 export const apiGetMoon = async () => {
-  return service.get('v7/astronomy/moon?location=101280601&date=20250806')
+  return service.get<IResMoon<IResMoonPhase>>('v7/astronomy/moon?location=101280601&date=20250807')
 }

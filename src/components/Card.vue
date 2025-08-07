@@ -1,8 +1,7 @@
 <script setup lang='ts'>
-import { Progress } from '@/components/ui/progress'
-import { SquareArrowUpRight, Sun, Table, ThermometerSun, Wind } from 'lucide-vue-next';
+import { SquareArrowUpRight, Table, Wind } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
-import { apiGetAirPollution, apiGetHourForecast, apiGetIndex, apiGetMoon, apiGetWarn, apiGetWeatherByCity, apiHistory } from '@/apis/weather';
+import { apiGetHourForecast, apiGetWeatherByCity, apiHistory } from '@/apis/weather';
 import { useFollowStore } from '@/store/follow';
 import type { CurrentResponse } from 'openweathermap-ts/dist/types';
 import { fahrenheitToCelsius } from '@/utils/weather';
@@ -27,7 +26,6 @@ defineOptions({
 const emits = defineEmits([
     'close'
 ])
-const progress = ref(13)
 
 interface Props {
     show: boolean,
@@ -44,31 +42,17 @@ const close = () => {
 
 // #region 获取current data
 const curData = ref<CurrentResponse | void>()
-const getWeather = async () => {
+const getCurWeather = async () => {
     const res = await apiGetWeatherByCity('Shenzhen')
     curData.value = res
 }
 // #endregion 获取current data
 
-// #region 获取空气质量data
-const airData = ref()
-const getAirPollution = async () => {
-    apiGetAirPollution({
-        lat: '31.2222',
-        lon: '121.4581',
-    }).then(res => {
-        airData.value = res.data
-    }).catch(err => {
-        console.log(err);
-    })
-}
-// #endregion 获取空气质量data
-
 // #region 获取24h hourData和 10day dayData
-const nextRainInfo = ref<IHourItem | null>(null)
+const nextRainWind = ref<IHourItem | null>(null)
 const hour24Data = ref<IHourItem[]>([])
 const day10Data = ref<{ [key: string]: IHourItem }>({})
-const get24HourTenDayData = async () => {
+const get24Hour10DayData = async () => {
     apiGetHourForecast({
         lat: '31.2222',
         lon: '121.4581',
@@ -80,8 +64,8 @@ const get24HourTenDayData = async () => {
         timeseries.forEach((item: IHourItem) => {
             if (new Date(item.time).getTime() >= tempDate) {
                 if (hourArr.length === 24) return
-                if (item.data.next_1_hours.summary.symbol_code.search('rain') !== -1 && !nextRainInfo.value) {
-                    nextRainInfo.value = item
+                if (!nextRainWind.value && (item.data.next_1_hours.summary.symbol_code.search('rain') !== -1 || item.data.next_1_hours.summary.symbol_code.search('cloudy') !== -1)) {
+                    nextRainWind.value = item
                 }
                 hourArr.push(item)
             }
@@ -102,43 +86,10 @@ const get24HourTenDayData = async () => {
     })
 }
 
-const warnData = ref<{
-    fxLink: string,
-    warning: Array<{ typeName: string }>,
-    refer: { sources: string[], }
-}>({ fxLink: '', warning: [], refer: { sources: [] } })
-const getWarnData = async () => {
-    apiGetWarn()
-        .then(res => {
-            warnData.value = res.data
-        })
-}
-
-const indexData = ref<{ fxLink: string, daily: Array<{ level: string; category: string }> }>({
-    fxLink: '',
-    daily: [{ level: '', category: '' }]
-})
-const getIndexData = () => {
-    apiGetIndex().then(res => {
-        indexData.value = res.data
-    })
-}
-
-const moonData = ref({})
-const getMoonData = () => {
-    apiGetMoon().then(res => {
-        moonData.value = res.data
-    })
-}
 
 onMounted(() => {
-    getWeather()
-    getAirPollution()
-    get24HourTenDayData()
-    getWarnData()
-    //getHistory()
-    getIndexData()
-    getMoonData()
+    getCurWeather()
+    get24Hour10DayData()
 })
 
 const { add } = useFollowStore()
@@ -166,9 +117,9 @@ const addCity = () => {
             </div>
             <div class="flex flex-col overflow-y-auto rounded-t-lg" style="height:calc(100% - 210px)">
                 <!-- #region 空气质量指数 -->
-                <Air :airData="airData" />
+                <Air />
                 <!-- #region 小时预报 -->
-                <HourForecast :nextRainInfo="nextRainInfo" :hour24Data="hour24Data" />
+                <HourForecast :nextRainWind="nextRainWind" :hour24Data="hour24Data" />
                 <!-- #endregion 小时预报 -->
                 <!-- #region 10日天气预报 -->
                 <DayForecast :day10Data="day10Data" />
@@ -183,12 +134,12 @@ const addCity = () => {
                 </div>
                 <!-- #endregion 空气质量地图 -->
                 <!-- #region 天气警报 -->
-                <Warn :warnData="warnData" />
+                <Warn />
                 <!-- #endregion 天气警报 -->
                 <!-- #region 体感温度+紫外线指数 -->
                 <div class="mt-2 flex flex-row justify-between gap-2">
                     <FeelLike :curData="curData" />
-                    <Rays :indexData="indexData" />
+                    <Rays />
                 </div>
                 <!-- #endregion 体感温度+紫外线指数 -->
                 <!-- #region 风 -->
@@ -198,7 +149,7 @@ const addCity = () => {
                 <!-- #region 日落+降水 -->
                 <div class="mt-2 flex flex-row justify-between gap-2">
                     <SunRiseSet :curData="curData" />
-                    <Precip :hour24Data="hour24Data" :nextRainInfo="nextRainInfo" />
+                    <Precip :hour24Data="hour24Data" :nextRainWind="nextRainWind" />
                 </div>
                 <!-- #endregion 日落+降水 -->
                 <!-- #region 能见度+湿度 -->
@@ -208,11 +159,11 @@ const addCity = () => {
                 </div>
                 <!-- #endregion 能见度+湿度 -->
                 <!-- #region 月 -->
-                <Moon :moonData="moonData" />
+                <Moon />
                 <!-- #endregion 月 -->
                 <!-- #region 平均+气压 -->
                 <div class="mt-2 flex flex-row justify-between gap-2">
-                    <Average />
+                    <Average :curData="curData" />
                     <Press />
                 </div>
                 <!-- #endregion 平均+气压 -->

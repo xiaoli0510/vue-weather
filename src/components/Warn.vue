@@ -1,10 +1,27 @@
 <script setup lang='ts'>
+import { apiGetWarn } from '@/apis/weather';
 import { TriangleAlert } from 'lucide-vue-next';
+import { onMounted, ref } from 'vue';
 
 defineOptions({
     name: 'WarnCom'
 })
-defineProps(['warnData'])
+
+const warnData = ref<{
+    fxLink: string,
+    warning: Array<{ typeName: string }>,
+    refer: { sources: string[], }
+}>({ fxLink: '', warning: [], refer: { sources: [] } })
+const getWarnData = async () => {
+    apiGetWarn()
+        .then(res => {
+            warnData.value = res.data
+        })
+}
+
+onMounted(() => {
+    getWarnData()
+})
 </script>
 <template>
     <a v-if="warnData.warning.length > 0" :href="warnData.fxLink" target="_blank"

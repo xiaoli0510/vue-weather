@@ -1,14 +1,14 @@
 <script setup lang='ts'>
 import { Cloud, CloudHail, Sun } from 'lucide-vue-next';
 
-defineProps(['nextRainInfo', 'hour24Data'])
+defineProps(['nextRainWind', 'hour24Data'])
 
 </script>
 <template>
     <div class="mt-2 w-full rounded-lg p-2 text-sm  bg-foreground/20">
-        <div class="text-xs border-b-1 border-foreground/20 leading-9">
-            {{ new Date(nextRainInfo!.time).getHours() }}时左右预计有雨。阵风风速最高{{
-                nextRainInfo?.data.instant.details.wind_speed }}米/秒。
+        <div class="text-xs border-b-1 border-foreground/20 leading-9" v-if="nextRainWind">
+            {{ new Date(nextRainWind!.time).getHours() }}时左右预计有雨。阵风风速最高{{
+                nextRainWind?.data.instant.details.wind_speed }}米/秒。
         </div>
         <div class="flex overflow-x-auto" v-if="hour24Data">
             <div class="text-xs p-1 mr-6 text-center  whitespace-nowrap" v-for="(item, index) in hour24Data"
