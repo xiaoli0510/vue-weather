@@ -1,7 +1,7 @@
 <script setup lang='ts'>
 import { SquareArrowUpRight, Table, Wind } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
-import { apiGetHourForecast, apiGetWeatherByCity, apiHistory } from '@/apis/weather';
+import { apiGetHourForecast, apiGetWeatherByCity } from '@/apis/weather';
 import { useFollowStore } from '@/store/follow';
 import type { CurrentResponse } from 'openweathermap-ts/dist/types';
 import { fahrenheitToCelsius } from '@/utils/weather';

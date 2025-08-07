@@ -1,6 +1,7 @@
 <script setup lang='ts'>
 import type { IResMoon, IResMoonPhase } from '@/apis/model/moon';
 import { apiGetMoon } from '@/apis/weather';
+import { MOON_PHASES } from '@/constants/moon';
 import { Eclipse } from 'lucide-vue-next';
 import { ref } from 'vue';
 import { onMounted } from 'vue';
@@ -18,9 +19,15 @@ onMounted(async () => {
     await getMoonData()
 })
 
+// 根据月相值（0→1）计算光照区域
+const getCurMoon = (val: string) => {
+    const parsedVal = Number(val)
+    return MOON_PHASES.find(phase => parsedVal >= phase.range[0] && parsedVal <= phase.range[1]) || MOON_PHASES[0]
+}
+
 </script>
 <template>
-    <div class="mt-2 w-full rounded-lg p-2 text-sm  bg-foreground/20" v-if="moonData">
+    <div class="mt-2 w-full rounded-lg p-2 text-sm  bg-foreground/20 h-36" v-if="moonData">
         <div class="text-xs text-foreground/50 flex flex-row mb-2">
             <Eclipse color="#ccc" :size="16" />
             <span>{{ moonData!.moonPhase[0].name }}</span>
@@ -42,7 +49,9 @@ onMounted(async () => {
                     }}天</span>
                 </div>
             </div>
-            <div>月的图片</div>
+            <div class="w-2/5">
+                <img :src="getCurMoon(moonData.moonPhase[0].value).image" class="h-28 m-auto" />
+            </div>
         </div>
     </div>
 </template>
