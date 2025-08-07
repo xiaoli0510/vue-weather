@@ -20,6 +20,7 @@ import Moon from './Moon.vue';
 import FeelLike from './FeelLike.vue';
 import Rays from './Rays.vue';
 import WindCom from './WindCom.vue';
+import AirQualityMap from './AirQualityMap.vue';
 
 defineOptions({
     name: 'CardCom'
@@ -128,13 +129,7 @@ const isShow = ref(false)
                 <DayForecast :day10Data="day10Data" v-if="isShow" />
                 <!-- #endregion 10日天气预报 -->
                 <!-- #region 空气质量地图 -->
-                <div class="mt-2 w-full rounded-lg p-2 text-sm  bg-foreground/20" v-if="isShow">
-                    <div class="text-xs text-foreground/50 flex flex-row mb-2">
-                        <Table color="#ccc" :size="16" />
-                        <span>空气质量地图</span>
-                    </div>
-                    <div>地图</div>
-                </div>
+                <AirQualityMap />
                 <!-- #endregion 空气质量地图 -->
                 <!-- #region 天气警报 -->
                 <Warn v-if="isShow" />
@@ -146,7 +141,7 @@ const isShow = ref(false)
                 </div>
                 <!-- #endregion 体感温度+紫外线指数 -->
                 <!-- #region 风 -->
-                <WindCom :curData="curData" />
+                <WindCom :curData="curData" v-if="isShow" />
                 <!-- #endregion 风 -->
 
                 <!-- #region 日落+降水 -->
