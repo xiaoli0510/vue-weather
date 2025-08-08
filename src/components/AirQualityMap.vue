@@ -7,17 +7,30 @@ import 'leaflet/dist/leaflet.css'
 defineOptions({
     name: 'AirQualityMapCom'
 })
+const props = defineProps(['airData'])
 
 
 const mapContainer = ref()
 
 onMounted(() => {
-    const map = L.map(mapContainer.value).setView([22.5431, 114.0579], 12)
+    const map = L.map(mapContainer.value).setView([22.5431, 114.0579], 10)
     // 方法1：更换瓦片源（推荐使用国内源）
     L.tileLayer('https://webst01.is.autonavi.com/appmaptile?style=7&x={x}&y={y}&z={z}', {
         subdomains: ['1', '2', '3', '4'],
         attribution: '© 高德地图'
-    }).addTo(map).bindPopup('我的位置').openPopup();
+    }).addTo(map)
+
+    const createCircleMarker = (lat: number, lng: number, text: string) => {
+        const circleIcon = L.divIcon({
+            html: `<div class="text-center"><span class="inline-block bg-black font-white border-1 border-green-600 w-8 h-8 rounded-full text-lg">${text}</span><br/><span class="font-white my-location text-xs">我的位置</span></div>`,
+            className: 'custom-circle-icon',
+            iconSize: [100, 100],
+            iconAnchor: [50, 50]
+        })
+        return L.marker([lat, lng], { icon: circleIcon }).addTo(map)
+    }
+
+    createCircleMarker(22.5431, 114.0579, props.airData.list[0].main.aqi)
 
     // 错误处理
     map.on('tileerror', (e) => {
@@ -37,3 +50,13 @@ onMounted(() => {
         </div>
     </div>
 </template>
+<style scoped>
+:deep(.my-location) {
+    text-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000;
+    /* 黑色文字描边 */
+}
+</style>

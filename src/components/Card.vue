@@ -1,12 +1,12 @@
 <script setup lang='ts'>
-import { SquareArrowUpRight, Table, Wind } from 'lucide-vue-next';
+import { SquareArrowUpRight } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
-import { apiGetHourForecast, apiGetWeatherByCity } from '@/apis/weather';
+import { apiGetAirPollution, apiGetHourForecast, apiGetWeatherByCity } from '@/apis/weather';
 import { useFollowStore } from '@/store/follow';
 import type { CurrentResponse } from 'openweathermap-ts/dist/types';
 import { fahrenheitToCelsius } from '@/utils/weather';
 import type { IHourItem } from './types';
-import Air from './Air.vue';
+import Aqi from './Aqi.vue';
 import HourForecast from './HourForecast.vue';
 import DayForecast from './DayForecast.vue';
 import Warn from './Warn.vue';
@@ -88,8 +88,20 @@ const get24Hour10DayData = async () => {
     })
 }
 
+const airData = ref()
+const getAirPollution = async () => {
+    apiGetAirPollution({
+        lat: '31.2222',
+        lon: '121.4581',
+    }).then(res => {
+        airData.value = res.data
+    }).catch(err => {
+        console.log(err);
+    })
+}
 
 onMounted(() => {
+    getAirPollution()
     getCurWeather()
     // get24Hour10DayData()
 })
@@ -121,7 +133,7 @@ const isShow = ref(false)
             </div>
             <div class="flex flex-col overflow-y-auto rounded-t-lg" style="height:calc(100% - 210px)">
                 <!-- #region 空气质量指数 -->
-                <Air v-if="isShow" />
+                <Aqi :airData="airData" />
                 <!-- #region 小时预报 -->
                 <HourForecast :nextRainWind="nextRainWind" :hour24Data="hour24Data" v-if="isShow" />
                 <!-- #endregion 小时预报 -->
@@ -129,7 +141,7 @@ const isShow = ref(false)
                 <DayForecast :day10Data="day10Data" v-if="isShow" />
                 <!-- #endregion 10日天气预报 -->
                 <!-- #region 空气质量地图 -->
-                <AirQualityMap />
+                <AirQualityMap :airData="airData" />
                 <!-- #endregion 空气质量地图 -->
                 <!-- #region 天气警报 -->
                 <Warn v-if="isShow" />

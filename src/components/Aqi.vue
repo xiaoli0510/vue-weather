@@ -1,28 +1,11 @@
 <script setup lang='ts'>
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import Progress from './ui/progress/Progress.vue';
-import { apiGetAirPollution } from '@/apis/weather';
 defineOptions({
-    name: 'AirCom'
+    name: 'AqiCom'
 })
+defineProps(['airData'])
 const progress = ref(13)
-
-const airData = ref()
-const getAirPollution = async () => {
-    apiGetAirPollution({
-        lat: '31.2222',
-        lon: '121.4581',
-    }).then(res => {
-        airData.value = res.data
-    }).catch(err => {
-        console.log(err);
-    })
-}
-
-onMounted(() => {
-    getAirPollution()
-})
-
 </script>
 <template>
     <div v-if="airData" class="mt-2 w-full rounded-lg p-2 text-sm  bg-foreground/20">
