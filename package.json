@@ -20,6 +20,7 @@
     "clsx": "^2.1.1",
     "jose": "^6.0.12",
     "leaflet": "^1.9.4",
+    "leaflet-control-geocoder": "^3.2.0",
     "lucide-vue-next": "^0.511.0",
     "openweathermap-ts": "^1.2.10",
     "pinia": "^3.0.2",

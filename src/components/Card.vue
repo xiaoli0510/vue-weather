@@ -1,7 +1,7 @@
 <script setup lang='ts'>
 import { SquareArrowUpRight } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
-import { apiGetAirPollution, apiGetHourForecast, apiGetWeatherByCity } from '@/apis/weather';
+import { apiGetAirPollution, apiGetWeatherByCity } from '@/apis/weather';
 import { useFollowStore } from '@/store/follow';
 import type { CurrentResponse } from 'openweathermap-ts/dist/types';
 import { fahrenheitToCelsius } from '@/utils/weather';
@@ -21,6 +21,7 @@ import FeelLike from './FeelLike.vue';
 import Rays from './Rays.vue';
 import WindCom from './WindCom.vue';
 import AirQualityMap from './AirQualityMap.vue';
+import { useCurCityStore } from '@/store/curCity';
 
 defineOptions({
     name: 'CardCom'
@@ -29,13 +30,12 @@ const emits = defineEmits([
     'close'
 ])
 
+const curCityStore = useCurCityStore()
 interface Props {
     show: boolean,
-    city?: string
 }
 const props = withDefaults(defineProps<Props>(), {
     show: true,
-    city: () => 'Shenzhen'
 })
 
 const close = () => {
@@ -45,7 +45,7 @@ const close = () => {
 // #region 获取current data
 const curData = ref<CurrentResponse | void>()
 const getCurWeather = async () => {
-    const res = await apiGetWeatherByCity('Shenzhen')
+    const res = await apiGetWeatherByCity(curCityStore!.city!.name)
     curData.value = res
 }
 // #endregion 获取current data
@@ -54,61 +54,23 @@ const getCurWeather = async () => {
 const nextRainWind = ref<IHourItem | null>(null)
 const hour24Data = ref<IHourItem[]>([])
 const day10Data = ref<{ [key: string]: IHourItem }>({})
-const get24Hour10DayData = async () => {
-    apiGetHourForecast({
-        lat: '31.2222',
-        lon: '121.4581',
-    }).then(res => {
-        const hour = new Date().getHours()
-        const tempDate = new Date().setHours(hour, 0, 0, 0)
-        const hourArr: Array<IHourItem> = []
-        const timeseries = res.data.properties.timeseries
-        timeseries.forEach((item: IHourItem) => {
-            if (new Date(item.time).getTime() >= tempDate) {
-                if (hourArr.length === 24) return
-                if (!nextRainWind.value && (item.data.next_1_hours.summary.symbol_code.search('rain') !== -1 || item.data.next_1_hours.summary.symbol_code.search('cloudy') !== -1)) {
-                    nextRainWind.value = item
-                }
-                hourArr.push(item)
-            }
-        })
-        hour24Data.value = hourArr
-
-        const dayObj: { [key: string]: IHourItem } = {}
-        timeseries.forEach((item: IHourItem) => {
-            const key = item.time.split('T')[0]
-            if (dayObj[key]) {
-                return;
-            }
-            dayObj[key] = item;
-        })
-        day10Data.value = dayObj
-    }).catch(err => {
-        console.log(err);
-    })
-}
 
 const airData = ref()
 const getAirPollution = async () => {
-    apiGetAirPollution({
-        lat: '31.2222',
-        lon: '121.4581',
-    }).then(res => {
-        airData.value = res.data
-    }).catch(err => {
-        console.log(err);
+    const res = await apiGetAirPollution({
+        lat: String(curCityStore!.city!.lat),
+        lon: String(curCityStore!.city!.lon),
     })
+    airData.value = res.data
 }
 
-onMounted(() => {
-    getAirPollution()
-    getCurWeather()
-    // get24Hour10DayData()
+onMounted(async () => {
+    await getAirPollution()
+    await getCurWeather()
 })
 
 const { add } = useFollowStore()
 const addCity = () => {
-    add(props.city)
 }
 
 const isShow = ref(false)

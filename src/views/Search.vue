@@ -4,6 +4,9 @@ import { Search, Mic, CircleX } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 import Card from '@/components/Card.vue';
 import { cityEn } from '@/data/en.city'
+import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
+import { apiGetLatLng } from '@/apis/weather';
+import { useCurCityStore } from '@/store/curCity';
 
 defineOptions({
     name: 'SearchView'
@@ -18,16 +21,16 @@ const history = ref([
     }
 ]);
 const provinceName = ref('')
-const curCityObj = ref({})
+const cityListObj = ref({})
 //搜索防抖
 const searchData = (val: string) => {
-    curCityObj.value = {}
+    cityListObj.value = {}
     const province: { [key: string]: string } = cityEn[0];
     const regex = new RegExp(val, 'i')
     for (const key in province) {
         const provinceKey = province[key]
         if (regex.test(provinceKey)) {
-            Object.assign(curCityObj.value, cityEn[key])
+            Object.assign(cityListObj.value, cityEn[key])
         }
     }
 }
@@ -44,19 +47,36 @@ watch(() => provinceName.value, (newVal) => {
 })
 const clear = () => {
     provinceName.value = ''
-    curCityObj.value = {}
+    cityListObj.value = {}
 }
 
 const showCard = ref(false)
-const city = ref('')
-const openCard = (name: string) => {
+const curCityStore = useCurCityStore()
+const openCard = async (name: string) => {
+    const [city] = name.split(' ')
     showCard.value = true
-    city.value = name
+    const res = await getCoordsAPI(city)
+    console.log('res', res);
+    if (!res) return
+    const { lat, lng: lon } = res
+    curCityStore.setCity({
+        name,
+        lat,
+        lon
+    })
 }
 
 const closeCard = () => {
     showCard.value = false
 }
+
+const getCoordsAPI = async (city: string) => {
+    const res = await apiGetLatLng(city)
+    const data = res.data;
+    return data.length > 0
+        ? { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) }
+        : null;
+};
 </script>
 <template>
     <div class="main bg-background h-full relative ">
@@ -83,9 +103,9 @@ const closeCard = () => {
             </div>
         </div>
         <div v-else style="height:calc(100% - 70px)" class="overflow-y-auto border-1 px-4">
-            <div class="mt-1 text-foreground" v-for="(value, key) in curCityObj" :key="key" @click="openCard(value)">{{
+            <div class="mt-1 text-foreground" v-for="(value, key) in cityListObj" :key="key" @click="openCard(value)">{{
                 value }}</div>
         </div>
-        <Card :show="showCard" @close="closeCard" :city="city" />
+        <Card :show="showCard" @close="closeCard" v-if="curCityStore!.city && curCityStore!.city!.name" />
     </div>
 </template>

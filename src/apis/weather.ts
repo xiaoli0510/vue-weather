@@ -29,13 +29,6 @@ export const apiGetAirPollution = (params: { lat: string; lon: string }) => {
   })
 }
 
-// 根据城市经纬度获取24h的天气预报
-export const apiGetHourForecast = (params: { lat: string; lon: string }) => {
-  return axios.get('https://api.met.no/weatherapi/locationforecast/2.0/compact', {
-    params,
-  })
-}
-
 // 根据location获取天气警报
 export const apiGetWarn = async () => {
   return service.get('v7/warning/now?location=101280601&lang=zh')
@@ -56,4 +49,12 @@ export const apiGet24hData = async () => {
 // 根据城市获取月相
 export const apiGetMoon = async () => {
   return service.get<IResMoon<IResMoonPhase>>('v7/astronomy/moon?location=101280601&date=20250807')
+}
+// 根据城市名称获取经纬度
+export const apiGetLatLng = async (city: string) => {
+  return axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city)}`,
+        {
+            headers: { 'Accept': 'application/json' }
+        }
+      )
 }
