@@ -14,9 +14,9 @@ defineProps(['curData'])
                 <Sunset color="#ccc" :size="16" />
                 <span>日落</span>
             </div>
-            <div class="text-lg">{{ formateSecond(curData.sys.sunset) }}</div>
+            <div class="text-lg" v-if="curData">{{ formateSecond(curData.sys.sunset) }}</div>
         </div>
         <p>日落图</p>
-        <p class="text-xs">日出：{{ formateSecond(curData.sys.sunrise) }}</p>
+        <p class="text-xs" v-if="curData">日出：{{ formateSecond(curData.sys.sunrise) }}</p>
     </div>
 </template>

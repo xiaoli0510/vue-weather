@@ -1,7 +1,7 @@
 <script setup lang='ts'>
 import "leaflet/dist/leaflet.css";
 import { Table } from 'lucide-vue-next';
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watchEffect } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 defineOptions({
@@ -11,8 +11,7 @@ const props = defineProps(['airData'])
 
 
 const mapContainer = ref()
-
-onMounted(() => {
+const initMap = () => {
     const map = L.map(mapContainer.value).setView([22.5431, 114.0579], 10)
     // 方法1：更换瓦片源（推荐使用国内源）
     L.tileLayer('https://webst01.is.autonavi.com/appmaptile?style=7&x={x}&y={y}&z={z}', {
@@ -37,6 +36,9 @@ onMounted(() => {
         console.error('瓦片加载失败:', e.tile.src)
         // 可以在这里显示备用瓦片或错误提示
     })
+}
+watchEffect(() => {
+    if (props.airData) initMap()
 })
 </script>
 <template>

@@ -13,14 +13,15 @@ defineProps(['nextRainWind', 'hour24Data'])
                 <Droplet color="#ccc" :size="16" />
                 <span>降水</span>
             </div>
-            <div class="text-lg" v-if="hour24Data">{{ hour24Data[0].data.next_1_hours.details.precipitation_amount }}毫米
+            <div class="text-lg" v-if="hour24Data && hour24Data[0]">{{
+                hour24Data[0].data.next_1_hours.details.precipitation_amount }}毫米
             </div>
             <div>今天</div>
         </div>
         <div v-if="nextRainWind">
             <p class="text-xs">预计接下来的{{ new Date(nextRainWind!.time
-            ).toLocaleTimeString('it-IT') }}时会有{{
-                    nextRainWind?.data.next_1_hours.details.precipitation_amount }}毫米</p>
+                ).toLocaleTimeString('it-IT') }}时会有{{
+                nextRainWind?.data.next_1_hours.details.precipitation_amount }}毫米</p>
         </div>
     </div>
 </template>

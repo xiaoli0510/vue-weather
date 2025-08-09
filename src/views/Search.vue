@@ -50,24 +50,38 @@ const clear = () => {
     cityListObj.value = {}
 }
 
-const showCard = ref(false)
+const isCard = ref(false)
 const curCityStore = useCurCityStore()
 const openCard = async (name: string) => {
     const [city] = name.split(' ')
-    showCard.value = true
-    const res = await getCoordsAPI(city)
-    console.log('res', res);
-    if (!res) return
-    const { lat, lng: lon } = res
-    curCityStore.setCity({
-        name,
-        lat,
-        lon
-    })
+    isCard.value = true
+    try {
+        const res = await getCoordsAPI(city)
+        console.log('res', res);
+        if (!res) return
+        const { lat, lng: lon } = res
+        curCityStore.setCity({
+            name,
+            lat,
+            lon
+        })
+    } catch (err) {
+        console.log(err);
+        const { lat, lng: lon } = {
+            lat: 31.2222,
+            lng: 121.4581,
+        }
+        curCityStore.setCity({
+            name: 'shenzhen',
+            lat,
+            lon
+        })
+    }
+
 }
 
 const closeCard = () => {
-    showCard.value = false
+    isCard.value = false
 }
 
 const getCoordsAPI = async (city: string) => {
@@ -106,6 +120,6 @@ const getCoordsAPI = async (city: string) => {
             <div class="mt-1 text-foreground" v-for="(value, key) in cityListObj" :key="key" @click="openCard(value)">{{
                 value }}</div>
         </div>
-        <Card :show="showCard" @close="closeCard" v-if="curCityStore!.city && curCityStore!.city!.name" />
+        <Card :show="isCard" @close="closeCard" v-if="isCard" />
     </div>
 </template>
