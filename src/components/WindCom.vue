@@ -21,7 +21,7 @@ const drawCompass = (
 
     // 绘制圆环
     ctx!.beginPath();
-    ctx!.arc(100, 100, 80, 0, Math.PI * 2);
+    ctx!.arc(77, 77, 70, 0, Math.PI * 2);
     ctx!.strokeStyle = '#eee';
     ctx!.lineWidth = 1;
     ctx!.stroke();
@@ -60,7 +60,7 @@ onMounted(async () => {
 })
 </script>
 <template>
-    <div class="mt-2 w-full rounded-lg p-2 text-sm  bg-foreground/20 min-h-96">
+    <div class="mt-2 w-full rounded-lg p-2 text-sm  bg-foreground/20">
         <div class="text-xs text-foreground/50 flex flex-row mb-2">
             <Wind color="#ccc" :size="16" />
             <span>风</span>
@@ -83,7 +83,7 @@ onMounted(async () => {
                 </div>
             </div>
             <div class="w-1/2">
-                <canvas id="wind-canvas" class="w-56"></canvas>
+                <canvas id="wind-canvas" class="w-44"></canvas>
             </div>
         </div>
     </div>
