@@ -1,8 +1,8 @@
 <script setup lang='ts'>
 import { Sun } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
-import Progress from './ui/progress/Progress.vue';
 import { apiGetIndex } from '@/apis/weather';
+import Progress from '@/components/ui/progress/Progress.vue';
 
 defineOptions({
     name: 'RaysCom'

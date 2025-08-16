@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 import { ref } from 'vue';
-import Progress from './ui/progress/Progress.vue';
+import Progress from '@/components/ui/progress/Progress.vue';
 defineOptions({
     name: 'AqiCom'
 })

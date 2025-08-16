@@ -2,11 +2,13 @@
 import Input from '@/components/ui/input/Input.vue';
 import { Search, Mic, CircleX } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
-import Card from '@/components/Card.vue';
+import Card from '@/views/detail/components/Card.vue';
 import { cityEn } from '@/data/en.city'
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
 import { apiGetLatLng } from '@/apis/weather';
 import { useCurCityStore } from '@/store/curCity';
+import { useCoords } from '@/hooks/useCoords';
+import { useRouter } from 'vue-router';
 
 defineOptions({
     name: 'SearchView'
@@ -55,42 +57,14 @@ const curCityStore = useCurCityStore()
 const openCard = async (name: string) => {
     const [city] = name.split(' ')
     isCard.value = true
-    try {
-        const res = await getCoordsAPI(city)
-        console.log('res', res);
-        if (!res) return
-        const { lat, lng: lon } = res
-        curCityStore.setCity({
-            name,
-            lat,
-            lon
-        })
-    } catch (err) {
-        console.log(err);
-        const { lat, lng: lon } = {
-            lat: 31.2222,
-            lng: 121.4581,
-        }
-        curCityStore.setCity({
-            name: 'shenzhen',
-            lat,
-            lon
-        })
-    }
+    const res = await useCoords(city)
+    if (res && res.coords) curCityStore.setCity(res.coords)
 
 }
 
 const closeCard = () => {
     isCard.value = false
 }
-
-const getCoordsAPI = async (city: string) => {
-    const res = await apiGetLatLng(city)
-    const data = res.data;
-    return data.length > 0
-        ? { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) }
-        : null;
-};
 </script>
 <template>
     <div class="main bg-background h-full relative ">

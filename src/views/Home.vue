@@ -2,11 +2,14 @@
 import { Input } from '@/components/ui/input'
 import { Mic, Moon, Search, Sun } from 'lucide-vue-next';
 import { useColorMode } from '@vueuse/core'
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import type { CurrentResponse } from 'openweathermap-ts/dist/types';
 import { useTheme } from '@/hooks/useTheme';
 import { apiGetWeatherByCity } from '@/apis/weather';
 import { useFollowStore } from '@/store/follow';
+import { useCurCityStore } from '@/store/curCity';
+import { useCoords } from '@/hooks/useCoords';
+import { useRouter } from 'vue-router';
 
 defineOptions({
     name: 'HomeView'
@@ -31,11 +34,24 @@ const getAllCityWeather = async () => {
         }
     );
 }
-getAllCityWeather()
+onMounted(() => {
+    getAllCityWeather()
+})
 
 const { toggleTheme } = useTheme()
 const toggleDarkMode = () => {
     toggleTheme()
+}
+
+const curCityStore = useCurCityStore()
+const router = useRouter()
+const goDetail = async (name: string, lon: number, lat: number) => {
+    curCityStore.setCity({
+        name,
+        lon,
+        lat
+    })
+    router.push('/detail')
 }
 </script>
 <template>
@@ -58,7 +74,8 @@ const toggleDarkMode = () => {
             </span>
         </div>
         <div class="flex flex-col gap-2 mt-4" v-if="list.length > 0">
-            <div class="rounded-lg p-2 bg-gray-300 text-foreground shadow-md" v-for="item in list" :key="item.id">
+            <div @click="goDetail(item.name, item.coord.lon, item.coord.lat)"
+                class="rounded-lg p-2 bg-gray-300 text-foreground shadow-md" v-for="(item, index) in list" :key="index">
                 <div class="flex flex-row justify-between items-center">
                     <div>
                         <div class="text-foreground/80">{{ item.name }}</div>

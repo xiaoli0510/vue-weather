@@ -4,7 +4,7 @@ import { RAINODDS } from '@/constants/weather';
 import { isTodayLocal } from '@/utils/date';
 import { CalendarDays, Cloud, CloudHail, Sun } from 'lucide-vue-next';
 import { ref } from 'vue';
-import Progress from './ui/progress/Progress.vue';
+import Progress from '@/components/ui/progress/Progress.vue';
 
 defineProps(['day10Data'])
 const progress = ref(13)
@@ -49,7 +49,7 @@ const progress = ref(13)
                 </div>
                 <div class="flex-1 flex-row flex items-center justify-center">
                     <span class="text-foreground/70">{{ value.data.instant.details.air_temperature
-                    }}°</span>
+                        }}°</span>
                     <Progress v-model="progress" class="w-3/5  mx-2" />
                     <span>{{ value.data.instant.details.air_temperature }}°</span>
                 </div>

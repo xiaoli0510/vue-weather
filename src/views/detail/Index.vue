@@ -1,47 +1,39 @@
 <script setup lang='ts'>
 import { SquareArrowUpRight } from 'lucide-vue-next';
-import { onMounted, ref, watch, watchEffect } from 'vue';
-import { apiGet24hData, apiGetAirPollution, apiGetHourForecast, apiGetWeatherByCity } from '@/apis/weather';
-import { useFollowStore } from '@/store/follow';
+import { onMounted, ref, watchEffect } from 'vue';
+import { apiGetAirPollution, apiGetHourForecast, apiGetWeatherByCity } from '@/apis/weather';
 import type { CurrentResponse } from 'openweathermap-ts/dist/types';
 import { fahrenheitToCelsius } from '@/utils/weather';
-import type { IHourItem } from './types';
-import Aqi from './Aqi.vue';
-import HourForecast from './HourForecast.vue';
-import DayForecast from './DayForecast.vue';
-import Warn from './Warn.vue';
-import SunRiseSet from './SunRiseSet.vue';
-import Precip from './Precip.vue';
-import Visibility from './Visibility.vue';
-import Dew from './Dew.vue';
-import Average from './Average.vue';
-import Press from './Press.vue';
-import Moon from './Moon.vue';
-import FeelLike from './FeelLike.vue';
-import Rays from './Rays.vue';
-import WindCom from './WindCom.vue';
-import AirQualityMap from './AirQualityMap.vue';
+import type { IHourItem } from './components/types';
+import Aqi from './components/Aqi.vue';
+import HourForecast from './components/HourForecast.vue';
+import DayForecast from './components/DayForecast.vue';
+import Warn from './components/Warn.vue';
+import SunRiseSet from './components/SunRiseSet.vue';
+import Precip from './components/Precip.vue';
+import Visibility from './components/Visibility.vue';
+import Dew from './components/Dew.vue';
+import Average from './components/Average.vue';
+import Press from './components/Press.vue';
+import Moon from './components/Moon.vue';
+import FeelLike from './components/FeelLike.vue';
+import Rays from './components/Rays.vue';
+import WindCom from './components/WindCom.vue';
+import AirQualityMap from './components/AirQualityMap.vue';
 import { useCurCityStore } from '@/store/curCity';
 
 defineOptions({
-    name: 'CardCom'
+    name: 'DetailView'
 })
-const emits = defineEmits([
-    'close'
-])
 
 const curCityStore = useCurCityStore()
-interface Props {
-    show: boolean,
-}
-withDefaults(defineProps<Props>(), {
-    show: true,
+onMounted(() => {
+    curCityStore.setCity({
+        name: 'ShenZhen',
+        lon: 121.4581,
+        lat: 31.2222
+    })
 })
-
-const close = () => {
-    emits('close')
-}
-
 // #region 获取current data
 const curData = ref<CurrentResponse | void>()
 const getCurWeather = async () => {
@@ -103,21 +95,10 @@ watchEffect(async () => {
         await get24Hour10DayData()
     }
 })
-
-const { add } = useFollowStore()
-const addCity = () => {
-}
-
-const isShow = ref(false)
 </script>
 <template>
-    <div v-if="show" class="absolute bottom-0 left-0 w-full bg-gray-400 rounded-t-lg overflow-y-auto p-4 text-white"
-        style="height:calc(100%  - 10px)">
-        <div class="flex text-xs justify-between">
-            <div @click="close">取消</div>
-            <div @click="addCity">添加</div>
-        </div>
-        <div class="my-6 text-center" v-if="curData">
+    <div class="bg-gray-400 p-2 text-white">
+        <div class="text-center" v-if="curData">
             <div class="text-lg">{{ curData.name }}</div>
             <div class="text-6xl my-2">{{ fahrenheitToCelsius(curData.main.temp) }}</div>
             <div>
