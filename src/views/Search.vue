@@ -1,7 +1,7 @@
 <script setup lang='ts'>
 import Input from '@/components/ui/input/Input.vue';
 import { Search, Mic, CircleX } from 'lucide-vue-next';
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import Card from '@/views/detail/components/Card.vue';
 import { cityEn } from '@/data/en.city'
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
@@ -61,6 +61,9 @@ const openCard = async (name: string) => {
     if (res && res.coords) curCityStore.setCity(res.coords)
 
 }
+onMounted(() => {
+    openCard('shenzhen')
+})
 
 const closeCard = () => {
     isCard.value = false

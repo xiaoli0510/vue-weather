@@ -4,6 +4,7 @@ import axios from 'axios'
 import OpenWeatherMap from 'openweathermap-ts'
 import type { IResMoon, IResMoonPhase } from './model/moon'
 import { useDateFormat, useNow } from '@vueuse/core'
+import proxyService from '@/utils/proxyService'
 
 const openWeather = new OpenWeatherMap({
   apiKey: '03529234da0b399e8332896853683dc1',
@@ -32,37 +33,37 @@ export const apiGetAirPollution = (params: { lat: string; lon: string }) => {
 
 // 根据location获取天气警报
 export const apiGetWarn = async () => {
-  return service.get('v7/warning/now?location=101280601&lang=zh')
+  return proxyService.get('v7/warning/now?location=101280601&lang=zh')
 }
 // 获取最近10天的历史数据
 export const apiHistory = async () => {
   const formattedToday = useDateFormat(useNow(), 'YYYYMMDD')
-  return service.get(`v7/historical/weather?location=101280601&date=${formattedToday}`)
+  return proxyService.get(`v7/historical/weather?location=101280601&date=${formattedToday}`)
 }
 // 获取紫外线指数
 export const apiGetIndex = async () => {
-  return service.get('v7/indices/1d?location=101280601&type=5')
+  return proxyService.get('v7/indices/1d?location=101280601&type=5')
 }
 
 // 根据城市经纬度获取24h天气
 export const apiGet24hData = async () => {
-  return service.get('v7/weather/24h?location=101280601&lang=zh')
+  return proxyService.get('v7/weather/24h?location=101280601&lang=zh')
 }
 // 根据城市获取月相
 export const apiGetMoon = async () => {
   const formattedToday = useDateFormat(useNow(), 'YYYYMMDD')
-  return service.get<IResMoon<IResMoonPhase>>(
+  return proxyService.get<IResMoon<IResMoonPhase>>(
     `v7/astronomy/moon?location=101280601&date=${formattedToday.value}`,
   )
 }
 // 根据城市名称获取经纬度
 export const apiGetLatLng = async (city: string) => {
-  return axios.get(
-    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city)}`,
-    {
-      headers: { Accept: 'application/json' },
+  return proxyService.get<any>(`/geo/v2/city/lookup`, {
+    params: {
+      type: 'scenic',
+      location: city,
     },
-  )
+  })
 }
 
 // 根据城市经纬度获取24h的天气预报
